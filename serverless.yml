@@ -1,0 +1,56 @@
+service: deployment-progress
+
+frameworkVersion: ">=1.1.0 <2.0.0"
+
+package:
+  exclude:
+    - .git/**
+    - README.md
+    - ui/**
+
+provider:
+  name: aws
+  runtime: nodejs4.3
+  environment:
+    DYNAMODB_TABLE_STATE: ${self:service}-${opt:stage, self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE_STATE}"
+
+functions:
+  create:
+    handler: state/create.create
+  update:
+    handler: state/update.update
+
+  list:
+    handler: state/list.list
+    events:
+      - http:
+          path: state
+          method: get
+          cors: true
+
+resources:
+  Resources:
+    StateDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: service
+            AttributeType: S
+        KeySchema:
+          - AttributeName: service
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMODB_TABLE_STATE}

@@ -1,0 +1,58 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+
+<dom-module id="ui-app">
+  <template>
+    <iron-ajax
+      auto
+      url="https://r5yeypvssk.execute-api.us-east-1.amazonaws.com/dev/state"
+      handle-as="json"
+      last-response="{{services}}"
+      ></iron-ajax>
+
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <table>
+      <tr>
+        <th>Service</th>
+        <template is="dom-repeat" items="{{stages}}" as="stage">
+          <th>{{stage}}</th>
+        </template>
+      </tr>
+      <template is="dom-repeat" items="{{services}}" as="service">
+        <tr>
+          <td>[[service.service]]</td>
+          <template is="dom-repeat" items="{{stages}}" as="stage">
+            <td>{{_stageStatus(service,stage)}}</td>
+          </template>
+        </tr>
+      </template>
+    </table>
+  </template>
+
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class UiApp extends Polymer.Element {
+      static get is() { return 'ui-app'; }
+      static get properties() {
+        return {
+          stages: {
+            type: Array,
+            value: ['test', 'preprod', 'prod']
+          }
+        };
+      }
+      _stageStatus(service,stage) {
+        return service[stage].buildNumber
+      }
+    }
+
+    window.customElements.define(UiApp.is, UiApp);
+  </script>
+</dom-module>

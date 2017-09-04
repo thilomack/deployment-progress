@@ -1,0 +1,10 @@
+{
+  "name": "deployment-progress",
+  "version": "1.0.0",
+  "description": "Show deployment status across multiple stages and services",
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "uuid": "^2.0.3"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "ui",
+  "short_name": "ui",
+  "description": "deployment progress",
+  "start_url": "/",
+  "display": "standalone"
+}
