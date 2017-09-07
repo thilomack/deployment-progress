@@ -1,5 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../progress/progress-step.html">
 
 <dom-module id="ui-app">
   <template>
@@ -14,30 +15,47 @@
       :host {
         display: block;
       }
+      .container {
+        display: flex;
+        margin-right: 50px;
+        margin-bottom: 20px;
+      }
+      .progress-header {
+        text-align: center;
+        margin-top: 40px;
+      }
+      progress-step, .progress-label, .progress-header {
+          width: 400px;
+          min-width: 100px;
+      }
+      .progress-label {
+        margin: auto;
+        text-align: right;
+        margin-right: 20px;
+      }
     </style>
-    <table>
-      <tr>
-        <th>Service</th>
-        <template is="dom-repeat" items="{{stages}}" as="stage">
-          <th>{{stage}}</th>
-        </template>
-      </tr>
-      <template is="dom-repeat" items="{{services}}" as="service">
-        <tr>
-          <td>[[service.service]]</td>
-          <template is="dom-repeat" items="{{stages}}" as="stage">
-            <td>{{_stageStatus(service,stage)}}</td>
-          </template>
-        </tr>
+    <div class="container">
+      <div class="progress-label"></div>
+      <template is="dom-repeat" items="{{stages}}" as="stage">
+        <div class="progress-header">{{stage}}</div>
       </template>
-    </table>
+    </div>
+    <template is="dom-repeat" items="{{services}}" as="service">
+      <div class="container">
+        <div class="progress-label">[[service.service]]</div>
+        <template is="dom-repeat" items="{{convertStages(service,stages)}}" as="stage">
+          <progress-step
+            old="[[stage.old]]"
+            head="[[stage.head]]"
+            last="[[stage.last]]"
+            >[[stage.version]]</progress-step>
+        </template>
+      </div>
+    </template>
+
   </template>
 
   <script>
-    /**
-     * @customElement
-     * @polymer
-     */
     class UiApp extends Polymer.Element {
       static get is() { return 'ui-app'; }
       static get properties() {
@@ -48,8 +66,25 @@
           }
         };
       }
-      _stageStatus(service,stage) {
-        return service[stage].buildNumber
+      stageVersion(service,stage) {
+        var result = service[stage];
+        return result == null ? null : result.buildNumber;
+      }
+      convertStages(service,stages) {
+        var result = [];
+        var maxVersion = -1;
+        for (var i = 0; i < stages.length; i++) {
+            var version = this.stageVersion(service, stages[i]);
+            var maxVersion = Math.max(version, maxVersion);
+            result.push ({
+              'name': stages[i],
+              'version': version,
+              'old': version != maxVersion,
+              'head': i == stages.length -1 || version > this.stageVersion(service, stages[i+1]),
+              'last': i == stages.length -1
+            });
+        }
+        return result;
       }
     }
 

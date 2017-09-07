@@ -1,0 +1,71 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<dom-module id="progress-step">
+  <template>
+    <style>
+      .container {
+        display: flex;
+        align-items: center;
+      }
+      .connector {
+        height: 5px;
+        flex-grow: 1;
+        background-color: green;
+      }
+      .circle {
+        border-radius: 50%;
+        height: 50px;
+        width: 50px;
+        display: flex;
+      }
+      .label {
+        margin: auto;
+      }
+      .connector, .circle { background-color: green; }
+      .old { background-color: #bbb; }
+      .last { background-color: #fff; }
+    </style>
+    <div class="container">
+      <div class$="connector [[_style(head,old)]]"></div>
+      <div class$="circle [[_style(head,old)]]">
+        <div class="label">
+          <slot></slot>
+        </div>
+      </div>
+      <div class$="connector [[_lastConnectorStyle(head,old,last)]]"></div>
+    </div>
+  </template>
+
+  <script>
+    class ProgressStep extends Polymer.Element {
+      static get is() { return 'progress-step'; }
+      static get properties() {
+        return {
+          head: {
+            type: Boolean,
+            value: false
+          },
+          old: {
+            type: Boolean,
+            value: false
+          },
+          last: {
+            type: Boolean,
+            value: false
+          }
+        };
+      }
+      _style(head,old) {
+        return old ? "old": ""
+      }
+      _lastConnectorStyle(head,old,last) {
+        if (last) {
+          return "last";
+        }
+        return (old || head) ? "old": ""
+      }
+    }
+
+    window.customElements.define(ProgressStep.is, ProgressStep);
+  </script>
+</dom-module>
