@@ -1,0 +1,28 @@
+Description: Create an S3 Object using a Custom Resource.
+Parameters:
+  BucketName:
+    Description: S3 Bucket Name
+    Type: String
+Resources:
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: 404.html
+  BucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref Bucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "s3:GetObject"
+            Effect: "Allow"
+            Resource: !Sub "arn:aws:s3:::${Bucket}/*"
+            Principal: "*"
+Outputs:
+  WebsiteURL:
+    Value: !GetAtt [Bucket, WebsiteURL]
+    Description: URL for website hosted on S3
