@@ -4,7 +4,7 @@ const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-depe
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-module.exports.update = (event, context, callback) => {
+module.exports.success = (event, context, callback) => {
   const timestamp = new Date().getTime();
 
 

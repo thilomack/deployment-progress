@@ -27,8 +27,8 @@ provider:
 functions:
   create:
     handler: state/create.create
-  update:
-    handler: state/update.update
+  build-success:
+    handler: state/buildFinished.success
 
   list:
     handler: state/list.list
