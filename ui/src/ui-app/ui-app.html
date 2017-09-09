@@ -37,6 +37,7 @@
         margin: auto;
         text-align: right;
         margin-right: 20px;
+        padding-bottom: 25px;
       }
     </style>
     <div class="container">
@@ -53,7 +54,14 @@
             old="[[stage.old]]"
             head="[[stage.head]]"
             last="[[stage.last]]"
-            >[[stage.version]]</progress-step>
+            >
+            <template is="dom-if" if="{{stage.url}}">
+              <a href="[[stage.ur]]">[[stage.text]]</a>
+            </template>
+            <template is="dom-if" if="{{!stage.url}}">
+              <div>[[stage.text]]</div>
+            </template>
+          </progress-step>
         </template>
       </div>
     </template>
@@ -67,14 +75,14 @@
         return {
         };
       }
-      stageVersion(service,stage) {
+      stageProperty(service,stage,name) {
         var result = service[stage];
-        return result == null ? null : result.buildNumber;
+        return result == null ? null : result[name];
       }
       sortServices(services) {
         var result = services.slice(0);
         result.sort(function(a,b){
-          var x = a["service"]; var y = b["service"];
+          var x = a['service']; var y = b['service'];
           return ((x < y) ? -1 : ((x > y) ? 1 : 0));
         })
         return result;
@@ -83,13 +91,18 @@
         var result = [];
         var maxVersion = -1;
         for (var i = 0; i < stages.length; i++) {
-            var version = this.stageVersion(service, stages[i]);
+            var stage = stages[i];
+            var version = this.stageProperty(service, stage, 'buildNumber');
             var maxVersion = Math.max(version, maxVersion);
+            var text = this.stageProperty(service, stage, 'text');
+            text = text ? text : version;
             result.push ({
               'name': stages[i],
               'version': version,
               'old': version != maxVersion,
-              'head': i == stages.length -1 || version > this.stageVersion(service, stages[i+1]),
+              'url': this.stageProperty(service, stage, 'url'),
+              'text': text,
+              'head': i == stages.length -1 || version > this.stageProperty(service, stages[i+1],'buildNumber'),
               'last': i == stages.length -1
             });
         }

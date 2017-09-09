@@ -29,7 +29,7 @@ curl https://XXXXXXX.execute-api.us-east-1.amazonaws.com/dev/state
 ### Update state
 
 ```bash
-serverless invoke -f update -d '{ "service": "aService", "stage": "dev", "buildNumber": 123, "text": "yay it works!" }'
+serverless invoke -f build-success -d '{ "service": "aService", "stage": "test", "buildNumber": 123, "url": "http://jenkins/path/to/build", "text": "v123" }'
 ```
 
 or execute the lambda from your jenkins job with aws-cli

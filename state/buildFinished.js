@@ -4,14 +4,31 @@ const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-depe
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
+const validateStringField = (event,fieldName,callback) => {
+  if (typeof event[fieldName] !== 'string') {
+    console.error('Validation Failed: ' + fieldName);
+    callback(new Error('Couldn\'t update.'));
+    return false;
+  }
+  return true;
+}
+const validateNumberField = (event,fieldName,callback) => {
+  if (typeof event[fieldName] !== 'number') {
+    console.error('Validation Failed: ' + fieldName);
+    callback(new Error('Couldn\'t update.'));
+    return false;
+  }
+  return true;
+}
+
 module.exports.success = (event, context, callback) => {
   const timestamp = new Date().getTime();
 
-
-  // validation
-  if (typeof event.service !== 'string' || typeof event.stage !== 'string' || typeof event.buildNumber !== 'number') {
-    console.error('Validation Failed');
-    callback(new Error('Couldn\'t update.'));
+  if (!(validateStringField(event, 'service', callback)
+        && validateStringField(event, 'stage', callback)
+        //&& validateStringField(event, 'url', callback) // optional for now
+        //&& validateStringField(event, 'text', callback)
+        && validateNumberField(event, 'buildNumber',callback))) {
     return;
   }
 
@@ -27,7 +44,7 @@ module.exports.success = (event, context, callback) => {
       //':text': event.text,
       //':buildNumber': event.buildNumber,
       ':updatedAt': timestamp,
-      ':buildStatus': { 'buildNumber': event.buildNumber, 'text': event.text },
+      ':buildStatus': event,
       //':buildNumber': event.buildNumber
     },
     // ensure we do not override a newer build
