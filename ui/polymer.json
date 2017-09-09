@@ -3,5 +3,9 @@
     "rules": [
       "polymer-2"
     ]
-  }
+  },
+  "sources": [
+    "data/**/*",
+    "config.json"
+  ]
 }
