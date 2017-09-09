@@ -45,7 +45,7 @@
         <div class="progress-header">{{stage}}</div>
       </template>
     </div>
-    <template is="dom-repeat" items="{{services}}" as="service">
+    <template is="dom-repeat" items="{{sortServices(services)}}" as="service">
       <div class="container">
         <div class="progress-label">[[service.service]]</div>
         <template is="dom-repeat" items="{{convertStages(service,config.stages)}}" as="stage">
@@ -70,6 +70,14 @@
       stageVersion(service,stage) {
         var result = service[stage];
         return result == null ? null : result.buildNumber;
+      }
+      sortServices(services) {
+        var result = services.slice(0);
+        result.sort(function(a,b){
+          var x = a["service"]; var y = b["service"];
+          return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+        })
+        return result;
       }
       convertStages(service,stages) {
         var result = [];
