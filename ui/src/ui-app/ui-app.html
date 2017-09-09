@@ -5,12 +5,17 @@
 <dom-module id="ui-app">
   <template>
     <iron-ajax
-      auto
-      url="https://r5yeypvssk.execute-api.us-east-1.amazonaws.com/dev/state"
+      auto=[[config]]
+      url="[[config.api]]/state"
       handle-as="json"
       last-response="{{services}}"
       ></iron-ajax>
-
+      <iron-ajax
+        auto
+        url="config.json"
+        handle-as="json"
+        last-response="{{config}}"
+        ></iron-ajax>
     <style>
       :host {
         display: block;
@@ -36,14 +41,14 @@
     </style>
     <div class="container">
       <div class="progress-label"></div>
-      <template is="dom-repeat" items="{{stages}}" as="stage">
+      <template is="dom-repeat" items="{{config.stages}}" as="stage">
         <div class="progress-header">{{stage}}</div>
       </template>
     </div>
     <template is="dom-repeat" items="{{services}}" as="service">
       <div class="container">
         <div class="progress-label">[[service.service]]</div>
-        <template is="dom-repeat" items="{{convertStages(service,stages)}}" as="stage">
+        <template is="dom-repeat" items="{{convertStages(service,config.stages)}}" as="stage">
           <progress-step
             old="[[stage.old]]"
             head="[[stage.head]]"
@@ -60,10 +65,6 @@
       static get is() { return 'ui-app'; }
       static get properties() {
         return {
-          stages: {
-            type: Array,
-            value: ['test', 'preprod', 'prod']
-          }
         };
       }
       stageVersion(service,stage) {

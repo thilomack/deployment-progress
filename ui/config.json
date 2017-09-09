@@ -1,0 +1,4 @@
+{
+  "api": "https://r5yeypvssk.execute-api.us-east-1.amazonaws.com/dev/",
+  "stages": ["test", "preprod", "prod"]
+}
