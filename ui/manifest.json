@@ -1,6 +1,6 @@
 {
-  "name": "ui",
-  "short_name": "ui",
+  "name": "deployments",
+  "short_name": "deployments",
   "description": "deployment progress",
   "start_url": "/",
   "display": "standalone"
