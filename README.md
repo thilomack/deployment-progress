@@ -13,12 +13,8 @@ npm install
 In order to deploy the endpoint simply run
 
 ```bash
-serverless deploy
+S3BUCKET=<name of deployment bucket> ./deploy-api.sh
 ```
-
-## Usage
-
-You can update or list deployment status with the following commands:
 
 ### List state
 
@@ -29,7 +25,7 @@ curl https://XXXXXXX.execute-api.us-east-1.amazonaws.com/dev/state
 ### Update state
 
 ```bash
-serverless invoke -f build-success -d '{ "service": "aService", "stage": "test", "buildNumber": 123, "url": "http://jenkins/path/to/build", "text": "v123" }'
+aws lambda invoke --function-name deployment-progress-test-build-success --log-type Tail --payload '{ "service": "aService", "stage": "test", "buildNumber": 123, "url": "http://jenkins/path/to/build", "text": "v123" }' output.json
 ```
 
-or execute the lambda from your jenkins job with aws-cli
+or call the lambda from your jenkins job with [invokeLambda](https://github.com/jenkinsci/pipeline-aws-plugin#invokelambda)
