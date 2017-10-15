@@ -31,7 +31,9 @@ module.exports.success = (event, context, callback) => {
         && validateNumberField(event, 'buildNumber',callback))) {
     return;
   }
-
+  if (!event['timestamp']) {
+    event['timestamp'] = timestamp;
+  }
   const params = {
     TableName: process.env.DYNAMODB_TABLE_STATE,
     Key: {
