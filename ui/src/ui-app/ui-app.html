@@ -61,6 +61,9 @@
             <template is="dom-if" if="{{!stage.url}}">
               <div>[[stage.text]]</div>
             </template>
+            <div slot="tooltip">
+              <p>Date: <span>{{stage.timestamp}}</span></p>
+            </div>
           </progress-step>
         </template>
       </div>
@@ -103,7 +106,8 @@
               'url': this.stageProperty(service, stage, 'url'),
               'text': text,
               'head': i == stages.length -1 || version > this.stageProperty(service, stages[i+1],'buildNumber'),
-              'last': i == stages.length -1
+              'last': i == stages.length -1,
+              'timestamp' : new Date(service[stage].timestamp)
             });
         }
         return result;

@@ -1,4 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 
 <dom-module id="progress-step">
   <template>
@@ -34,6 +35,7 @@
         <div class="label">
           <slot></slot>
         </div>
+        <paper-tooltip position="right"><slot name="tooltip"></slot></paper-tooltip>
       </div>
       <div class$="connector [[_lastConnectorStyle(head,old,last)]]"></div>
     </div>
