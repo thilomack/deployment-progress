@@ -1,0 +1,146 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: 'SAM template for Serverless framework service: '
+Parameters:
+  Stage:
+    Type: String
+    Default: test
+Resources:
+  StateDynamoDbTable:
+    Type: 'AWS::DynamoDB::Table'
+    DeletionPolicy: Retain
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: service
+          AttributeType: S
+      KeySchema:
+        - AttributeName: service
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      TableName: !Sub deployment-progress-${Stage}
+  BuildSuccessHandler:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: state/buildFinished.success
+      Runtime: nodejs4.3
+      CodeUri: './lambda'
+      MemorySize: 128
+      Timeout: 3
+      FunctionName: !Sub deployment-progress-${Stage}-build-success
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'dynamodb:Query'
+                - 'dynamodb:Scan'
+                - 'dynamodb:GetItem'
+                - 'dynamodb:PutItem'
+                - 'dynamodb:UpdateItem'
+                - 'dynamodb:DeleteItem'
+              Resource: !GetAtt StateDynamoDbTable.Arn
+      Environment:
+        Variables:
+          DYNAMODB_TABLE_STATE: !Ref StateDynamoDbTable
+  ListHandler:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: state/list.list
+      Runtime: nodejs4.3
+      CodeUri: './lambda'
+      MemorySize: 128
+      Timeout: 3
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'dynamodb:Query'
+                - 'dynamodb:Scan'
+                - 'dynamodb:GetItem'
+              Resource: !GetAtt StateDynamoDbTable.Arn
+      Environment:
+        Variables:
+          DYNAMODB_TABLE_STATE: !Ref StateDynamoDbTable
+      Events:
+        Get:
+          Type: Api
+          Properties:
+            Path: state
+            Method: get
+            RestApiId:
+              Ref: RestApi
+  ConfigLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    DependsOn:
+    - RestApi
+    - ListHandler
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref ListHandler
+      Principal: apigateway.amazonaws.com
+  RestApi:
+    Type: 'AWS::Serverless::Api'
+    Properties:
+      StageName: !Sub ${Stage}
+      DefinitionBody:
+        swagger: '2.0'
+        info:
+          title:
+            Ref: 'AWS::StackName'
+        paths:
+          /state:
+            options:
+              x-amazon-apigateway-integration:
+                type: mock
+                requestTemplates:
+                  application/json: '{ "statusCode" : 200 }'
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+                      method.response.header.Access-Control-Allow-Methods: '''get'''
+                      method.response.header.Access-Control-Allow-Origin: '''*'''
+                    responseTemplates:
+                      application/json: '{}'
+              responses:
+                '200':
+                  headers:
+                    Access-Control-Allow-Headers:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Origin:
+                      type: string
+            get:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  'Fn::Sub': >-
+                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ListHandler.Arn}/invocations
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+                      method.response.header.Access-Control-Allow-Methods: '''get'''
+                      method.response.header.Access-Control-Allow-Origin: '''*'''
+                    responseTemplates:
+                      application/json: '{}'
+              responses:
+                '200':
+                  headers:
+                    Access-Control-Allow-Headers:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Origin:
+                      type: string
+Outputs:
+  ApiUrl:
+    Description: REST API endpoint URL
+    Value: !Sub "https://${RestApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/"

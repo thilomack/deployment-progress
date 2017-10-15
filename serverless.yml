@@ -8,6 +8,10 @@ package:
     - README.md
     - ui/**
 
+plugins:
+  - serverless-sam
+
+
 provider:
   name: aws
   runtime: nodejs4.3
