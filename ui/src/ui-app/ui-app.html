@@ -107,7 +107,7 @@
               'text': text,
               'head': i == stages.length -1 || version > this.stageProperty(service, stages[i+1],'buildNumber'),
               'last': i == stages.length -1,
-              'timestamp' : new Date(service[stage].timestamp)
+              'timestamp' : new Date(this.stageProperty(service, stage, 'timestamp'))
             });
         }
         return result;
